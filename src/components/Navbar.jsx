@@ -30,6 +30,7 @@ const Navbar = () => {
                 ))}
             </Toolbar>
         </AppBar>
+
     );
 };
 

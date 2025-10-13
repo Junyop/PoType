@@ -15,7 +15,8 @@ const ModeToggle = () => {
                 if (newMode) setMode(newMode);
             }}
             size="small"
-            sx={{ position: 'fixed', top: 16, right: 16, zIndex: 999 }}
+            sx={{ position: 'sticky', width: 'fit-content', zIndex: 999, left: '100%', mt: 2, mb: 2, top: 8, backgroundColor: 'background.paper', border: '1px solid', borderColor: 'divider', borderRadius: 2 }}
+
         >
             <ToggleButton value="pokemon">
                 <CatchingPokemonIcon sx={{ mr: 1 }} /> Pokémon Seç

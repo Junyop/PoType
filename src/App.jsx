@@ -8,14 +8,15 @@ import ModeToggle from './components/ModeToggle';
 function App() {
   return (
     <Router>
+      <Navbar />
       <ModeToggle />
 
-      <Navbar />
       <Routes>
         <Route path="/" element={<Navigate to="/calculator" />} />
         <Route path="/calculator" element={<TypeCalculator />} />
         <Route path="/team" element={<TeamBuilder />} />
       </Routes>
+
     </Router>
   );
 }

@@ -26,7 +26,7 @@ const TeamSlot = ({ slotIndex, slot }) => {
     const handleTypeChange = (e) => {
         const types = e.target.value.slice(0, 2);
         setSelectedTypes(types);
-        setSelectedPokemon(''); // manuel seçince Pokémon sıfırlanır
+        setSelectedPokemon('');
         dispatch(setSlotTypes({ slotIndex, types }));
     };
 
@@ -39,13 +39,13 @@ const TeamSlot = ({ slotIndex, slot }) => {
             dispatch(setSlotTypes({ slotIndex, types: found.types }));
         }
     };
-    const { mode } = useTypeSelectorMode(); // ✅ Bu doğru
+    const { mode } = useTypeSelectorMode();
 
     return (
         <Box sx={{ border: '1px solid #ccc', borderRadius: 2, p: 2 }}>
             <Typography variant="h6">Slot {slotIndex + 1}</Typography>
 
-            {/* ✅ Pokémon Seçimi */}
+
             {mode === 'pokemon' && (
                 <FormControl fullWidth sx={{ mt: 2 }}>
                     <InputLabel>Select Pokémon</InputLabel>
@@ -55,10 +55,12 @@ const TeamSlot = ({ slotIndex, slot }) => {
                         onChange={handlePokemonChange}
                     >
                         {pokemonList.map((poke) => (
-                            <MenuItem key={poke.name} value={poke.name}>
+                            <MenuItem key={poke.name} value={poke.name} >
                                 {poke.name}
+                                {poke.sprite && <img src={poke.sprite} alt={poke.name} style={{ width: 24, height: 24, marginLeft: 8 }} />}
                             </MenuItem>
                         ))}
+
                     </Select>
                 </FormControl>
             )}
@@ -85,7 +87,6 @@ const TeamSlot = ({ slotIndex, slot }) => {
                     </Select>
                 </FormControl>
             )}
-            {/* ✅ Manuel Type Seçimi */}
             <FormControl fullWidth sx={{ mt: 2 }}>
                 <InputLabel>Select Types</InputLabel>
                 <Select
