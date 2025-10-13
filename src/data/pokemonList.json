@@ -1,0 +1,25 @@
+[
+    {
+        "name": "Dragonite",
+        "types": [
+            "dragon",
+            "flying"
+        ],
+        "sprite": "https://img.pokemondb.net/sprites/home/normal/dragonite.png"
+    },
+    {
+        "name": "Lucario",
+        "types": [
+            "fighting",
+            "steel"
+        ],
+        "sprite": "https://img.pokemondb.net/sprites/home/normal/lucario.png"
+    },
+    {
+        "name": "Pikachu",
+        "types": [
+            "electric"
+        ],
+        "sprite": "https://img.pokemondb.net/sprites/home/normal/pikachu.png"
+    }
+]
