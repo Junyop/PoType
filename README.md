@@ -1,12 +1,34 @@
-# React + Vite
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+# PoType
 
-Currently, two official plugins are available:
+PoType, Pokémon tipi hesaplama ve takım oluşturma özellikleri sunan bir web uygulamasıdır. Kullanıcılar, Pokémon tiplerinin zayıflıklarını, güçlerini ve takım sinerjilerini kolayca analiz edebilir.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## Kurulum
 
-## Expanding the ESLint configuration
+1. Depoyu klonlayın:
+	```bash
+	git clone https://github.com/Junyop/PoType.git
+	cd PoType
+	```
+2. Bağımlılıkları yükleyin:
+	```bash
+	npm install
+	```
+3. Uygulamayı başlatın:
+	```bash
+	npm run dev
+	```
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+## Kullanım
+
+- Ana sayfada Pokémon tiplerini seçerek zayıflık ve güç tablolarını görüntüleyebilirsiniz.
+- Takım oluşturucu ile farklı Pokémon tiplerinden bir takım kurup sinerjilerini analiz edebilirsiniz.
+- Tip hesaplayıcı ile seçilen tiplerin karşılıklı etkilerini inceleyebilirsiniz.
+
+## Katkı Sağlama
+
+Katkıda bulunmak için lütfen bir issue açın veya doğrudan pull request gönderin. Kod standartlarına ve mevcut dosya yapısına uygun şekilde katkı sağlayınız.
+
+## Lisans
+
+Bu proje MIT lisansı ile lisanslanmıştır. Ayrıntılar için `LICENSE` dosyasını inceleyebilirsiniz.
