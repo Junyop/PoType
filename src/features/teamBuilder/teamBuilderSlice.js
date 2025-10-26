@@ -6,15 +6,10 @@ import {
     flattenAttackData
 } from '../typeCalculator/typeUtils';
 
+const emptySlot = { types: [], attack: {}, defense: {}, pokemon: "" };
+
 const initialState = {
-    team: [
-        { types: [], attack: {}, defense: {} },
-        { types: [], attack: {}, defense: {} },
-        { types: [], attack: {}, defense: {} },
-        { types: [], attack: {}, defense: {} },
-        { types: [], attack: {}, defense: {} },
-        { types: [], attack: {}, defense: {} }
-    ]
+    team: Array(6).fill(emptySlot)
 };
 
 const teamBuilderSlice = createSlice({
@@ -22,27 +17,22 @@ const teamBuilderSlice = createSlice({
     initialState,
     reducers: {
         setSlotTypes(state, action) {
-            const { slotIndex, types } = action.payload;
+            const { slotIndex, types, pokemon } = action.payload;
             const limitedTypes = types.slice(0, 2);
 
             const defense = calculateDefenseEffectiveness(limitedTypes, typeChart);
-
             const allTargets = Object.keys(typeChart).map((t) => [t]);
-
-            const rawAttack = calculateAttackEffectiveness(
-                limitedTypes,
-                allTargets,
-                typeChart
-            );
-
+            const rawAttack = calculateAttackEffectiveness(limitedTypes, allTargets, typeChart);
             const attack = flattenAttackData(rawAttack);
 
             state.team[slotIndex] = {
                 types: limitedTypes,
                 attack,
-                defense
+                defense,
+                pokemon: pokemon || ""
             };
         },
+
         reorderTeam(state, action) {
             const { sourceIndex, destIndex } = action.payload;
             const updated = [...state.team];
@@ -50,9 +40,15 @@ const teamBuilderSlice = createSlice({
             updated.splice(destIndex, 0, removed);
             state.team = updated;
         },
+
         setFullTeam(state, action) {
             state.team = action.payload;
-        }
+        },
+
+        resetTeam(state) {
+            // tüm slotları sıfırla
+            state.team = Array(6).fill(emptySlot);
+        },
     }
 });
 

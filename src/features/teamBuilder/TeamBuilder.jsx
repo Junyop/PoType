@@ -2,127 +2,94 @@ import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import TeamSlot from '../../components/TeamSlot';
 import SummaryTable from '../../components/SummaryTable';
-import { resetTeam, reorderTeam } from './teamBuilderSlice';
-import { setFullTeam } from './teamBuilderSlice';
+import { resetTeam, setFullTeam } from './teamBuilderSlice';
 
 import {
     Container,
     Grid,
     Button,
     Typography,
-    Paper
+    Paper,
+    ButtonGroup,
+    Box,
 } from '@mui/material';
-import {
-    DragDropContext,
-    Droppable,
-    Draggable
-} from '@hello-pangea/dnd';
 
 const TeamBuilder = () => {
     const dispatch = useDispatch();
     const team = useSelector((state) => state.teamBuilder.team);
 
-    const handleDragEnd = (result) => {
-        const { source, destination } = result;
-        if (!destination) return;
-        if (source.index === destination.index) return;
+    const handleExport = () => {
+        const blob = new Blob([JSON.stringify(team, null, 2)], {
+            type: 'application/json',
+        });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = 'myTeam.json';
+        link.click();
+    };
 
-        dispatch(reorderTeam({ sourceIndex: source.index, destIndex: destination.index }));
+    const handleImport = (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (event) => {
+            try {
+                const data = JSON.parse(event.target.result);
+                dispatch(setFullTeam(data));
+            } catch (error) {
+                alert('Geçersiz JSON dosyası!\n' + error.message);
+            }
+        };
+        reader.readAsText(file);
     };
 
     return (
-        <Container sx={{ mt: 3 }}>
-            <Typography variant="h4" gutterBottom>
-                Team Type Analyzer
+        <Container sx={{ mt: 4 }}>
+            <Typography
+                variant="h4"
+                align="center"
+                fontWeight="bold"
+                gutterBottom
+                sx={{ color: 'primary.main' }}
+            >
+                Pokémon Takım Analizörü
             </Typography>
 
-            <DragDropContext onDragEnd={handleDragEnd}>
-                <Droppable droppableId="teamSlots">
-                    {(provided) => (
-                        <Grid
-                            container
-                            spacing={2}
-                            ref={provided.innerRef}
-                            {...provided.droppableProps}
-                        >
-                            {team.map((slot, index) => (
-                                <Draggable key={index} draggableId={`slot-${index}`} index={index}>
-                                    {(provided) => (
-                                        <Grid
-                                            item
-                                            xs={12}
-                                            md={6}
-                                            ref={provided.innerRef}
-                                            {...provided.draggableProps}
-                                            {...provided.dragHandleProps}
-                                        >
-                                            <Paper elevation={2} sx={{ p: 1 }}>
-                                                <TeamSlot slotIndex={index} slot={slot} />
-                                            </Paper>
-                                        </Grid>
-                                    )}
-                                </Draggable>
-                            ))}
-                            {provided.placeholder}
-                        </Grid>
-                    )}
-                </Droppable>
-            </DragDropContext>
+            <Box sx={{
+                display: 'flex', justifyContent: 'center', mb: 3
 
-            <Button
-                variant="contained"
-                color="secondary"
-                sx={{ mt: 3 }}
-                onClick={() => dispatch(resetTeam())}
-            >
-                Reset Team
-            </Button>
-            <Button
-                variant="outlined"
-                color="primary"
-                sx={{ mt: 3, ml: 2 }}
-                onClick={() => {
-                    const blob = new Blob([JSON.stringify(team, null, 2)], { type: 'application/json' });
-                    const url = URL.createObjectURL(blob);
-                    const link = document.createElement('a');
-                    link.href = url;
-                    link.download = 'myTeam.json';
-                    link.click();
-                }}
-            >
-                Export Team
-            </Button>
+            }}>
+                <Button variant="contained" color="secondary" onClick={() => dispatch(resetTeam())} >
+                    Takımı Sıfırla
+                </Button>
+                <Button variant="contained" color="primary" onClick={handleExport} sx={{ mr: 2, ml: 2 }}>
+                    Dışa Aktar
+                </Button>
+                <Button variant="contained" component="label" color="info">
+                    İçe Aktar
+                    <input
+                        type="file"
+                        accept=".json"
+                        hidden
+                        onChange={handleImport}
+                    />
+                </Button>
+            </Box>
 
-            <Button
-                variant="outlined"
-                color="primary"
-                component="label"
-                sx={{ mt: 3, ml: 2 }}
-            >
-                Import Team
-                <input
-                    type="file"
-                    accept=".json"
-                    hidden
-                    onChange={(e) => {
-                        const file = e.target.files[0];
-                        if (!file) return;
-                        const reader = new FileReader();
-                        reader.onload = (event) => {
-                            try {
-                                const data = JSON.parse(event.target.result);
-                                dispatch(setFullTeam(data));
-                            } catch (error) {
-                                alert('Invalid JSON file!\n' + error.message);
-                            }
-                        };
-                        reader.readAsText(file);
-                    }}
-                />
-            </Button>
+            <Grid container spacing={2} justifyContent="center" alignItems="flex-start">
+                {team.map((slot, index) => (
+                    <Grid item key={index}>
+                        <Paper elevation={3}>
+                            <TeamSlot slotIndex={index} slot={slot} />
+                        </Paper>
+                    </Grid>
+                ))}
+            </Grid>
 
-
-            <SummaryTable team={team} />
+            <Box sx={{ mt: 4 }}>
+                <SummaryTable team={team} />
+            </Box>
         </Container>
     );
 };
