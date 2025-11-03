@@ -1,5 +1,5 @@
 import React from 'react';
-import typeColors from '../utils/typeColors'; // en üste ekle
+import typeColors from '../utils/typeColors';
 
 import { useDispatch, useSelector } from 'react-redux';
 import { setSelectedTypes, resetTypes } from '../features/typeCalculator/typeCalculatorSlice';

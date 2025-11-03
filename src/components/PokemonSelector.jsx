@@ -1,153 +1,11 @@
-import React, { useState, useEffect, useMemo } from "react";
-import { useDispatch } from "react-redux";
-import { setSlotTypes } from "../features/teamBuilder/teamBuilderSlice";
+import React, { useState, useMemo } from "react";
+import { Box, Stack, TextField, IconButton, Tooltip, Menu, MenuItem, FormControl, InputLabel, Select, Typography, Chip } from "@mui/material";
+import SortIcon from '@mui/icons-material/Sort';
+import pokemonList from "../data/pokemonList.json";
 import typeChart from "../data/typeChart.json";
-import fullPokemonList from "../data/pokemonList.json";
-import {
-    Box,
-    Typography,
-    FormControl,
-    InputLabel,
-    Select,
-    MenuItem,
-    Chip,
-    TextField,
-    IconButton,
-    Tooltip,
-    Stack,
-    Button,
-    Collapse,
-    Menu,
-    Divider,
-} from "@mui/material";
-import SortIcon from "@mui/icons-material/Sort";
-import useTypeSelectorMode from "../contexts/useTypeSelectorMode";
-import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+const allTypes = Object.keys(typeChart);
 import typeColors from "../utils/typeColors";
 
-const allTypes = Object.keys(typeChart);
-
-const pokemonList = fullPokemonList
-    .filter((p) => p.name !== "Pokeball")
-    .sort((a, b) => (a.id || 9999) - (b.id || 9999));
-
-const TeamSlot = ({ slotIndex, slot }) => {
-    const dispatch = useDispatch();
-    const { mode } = useTypeSelectorMode();
-    const isPokemonMode = mode === "pokemon";
-    const isTypeMode = mode === "type";
-
-    const [selectedPokemon, setSelectedPokemon] = useState(slot.pokemon || "");
-    const [selectedTypes, setSelectedTypes] = useState(slot.types || []);
-
-    //  slot değiştiğinde local state'i güncelle (reset dahil)
-    useEffect(() => {
-        setSelectedPokemon(slot.pokemon || "");
-        setSelectedTypes(slot.types || []);
-    }, [slot]);
-
-    const handlePokemonChange = (e) => {
-        const name = e.target.value;
-        setSelectedPokemon(name);
-        const found = pokemonList.find((p) => p.name === name);
-        if (found) {
-            setSelectedTypes(found.types);
-            dispatch(setSlotTypes({ slotIndex, types: found.types, pokemon: name }));
-        }
-    };
-
-    const handleTypeChange = (types) => {
-        setSelectedTypes(types);
-        setSelectedPokemon("");
-        dispatch(setSlotTypes({ slotIndex, types, pokemon: "" }));
-    };
-
-    const selectedPokeData = pokemonList.find((p) => p.name === selectedPokemon);
-
-    const cardWidth = 300;
-    const cardHeight = 390;
-
-    return (
-        <Box
-            sx={{
-                width: cardWidth,
-                height: cardHeight,
-                border: "1px solid #ccc",
-                borderRadius: 3,
-                p: 2,
-                boxShadow: 2,
-                bgcolor: "background.paper",
-                display: "flex",
-                flexDirection: "column",
-                justifyContent: "space-between",
-                alignItems: "center",
-                transition: "all 0.25s ease",
-                "&:hover": { transform: "translateY(-3px)", boxShadow: 4 },
-                backgroundColor: isPokemonMode
-                    ? selectedPokeData
-                        ? typeColors(selectedPokeData.types[0]) + "72"
-                        : "grey.200"
-                    : isTypeMode
-                        ? typeColors(selectedTypes[0] || "normal") + "72"
-                        : "grey.200"
-            }}
-        >
-            <Typography variant="subtitle1" sx={{ fontWeight: "bold", mb: 1 }}>
-                Slot {slotIndex + 1}
-            </Typography>
-
-            {/* Görsel */}
-            {isPokemonMode && selectedPokeData && (
-                <Box component="img" src={selectedPokeData.sprite} alt={selectedPokemon}
-                    sx={{ width: 140, height: 140, objectFit: "contain", mb: 1 }} />
-            )}
-
-            {isTypeMode && (
-                <Box
-                    component="img"
-                    src="https://img.pokemondb.net/sprites/items/poke-ball.png"
-                    alt="Pokéball"
-                    sx={{ width: 96, height: 96, objectFit: "contain", mb: 1 }}
-                />
-            )}
-
-            {/* Type chip'ler */}
-            {isPokemonMode && selectedTypes.length > 0 && (
-                <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap", justifyContent: "center", mb: 1 }}>
-                    {selectedTypes.map((type) => (
-                        <Chip key={type} label={type}
-                            sx={{ fontWeight: "bold", color: "white", bgcolor: typeColors(type) }} />
-                    ))}
-                </Box>
-            )}
-            {/* Selector container (scrollable) */}
-            <Box
-                sx={{
-                    width: "100%",
-                    flexGrow: 1,
-                    overflowY: "auto",
-                    p: 0.5,
-                    "&::-webkit-scrollbar": {
-                        width: 6,
-                    },
-                    "&::-webkit-scrollbar-thumb": {
-                        backgroundColor: selectedPokeData ? typeColors(selectedPokeData.types[0]) : "grey",
-                        borderRadius: 3,
-                    },
-                }}
-            >{isPokemonMode ? (
-                <PokemonSelector value={selectedPokemon} onChange={handlePokemonChange} />
-            ) : (
-                <TypeSelector value={selectedTypes} onChange={handleTypeChange} />
-            )}
-            </Box>
-        </Box>
-    );
-};
-
-/* --------------------------
-   PokemonSelector Component
----------------------------*/
 const PokemonSelector = ({ value, onChange }) => {
     const [searchTerm, setSearchTerm] = useState("");
     const [typeFilter, setTypeFilter] = useState([]);
@@ -258,7 +116,7 @@ const PokemonSelector = ({ value, onChange }) => {
                 <InputLabel>Pokémon Seç</InputLabel>
                 <Select value={value} label="Pokémon Seç" onChange={onChange}>
                     {filteredList.map((poke) => (
-                        <MenuItem key={poke.id} value={poke.name}>
+                        <MenuItem key={poke.name} value={poke.name}>
                             <Box sx={{
                                 display: "flex",
                                 alignItems: "center",
@@ -326,45 +184,4 @@ const PokemonSelector = ({ value, onChange }) => {
     );
 };
 
-
-/* --------------------------
-   TypeSelector Component
----------------------------*/
-const TypeSelector = ({ value, onChange }) => {
-    const handleSelect = (type) => {
-        let updated;
-        if (value.includes(type)) {
-            updated = value.filter((t) => t !== type);
-        } else if (value.length < 2) {
-            updated = [...value, type];
-        } else {
-            updated = value;
-        }
-        onChange(updated);
-    };
-
-    return (
-        <Box sx={{
-            display: "flex",
-            flexWrap: "wrap",
-            gap: 1,
-            justifyContent: "center",
-        }}>
-            {allTypes.map((type) => (
-                <Chip
-                    key={type}
-                    label={type}
-                    onClick={() => handleSelect(type)}
-                    sx={{
-                        bgcolor: value.includes(type) ? typeColors(type) : "grey.300",
-                        color: value.includes(type) ? "white" : "black",
-                        fontWeight: "bold",
-                        cursor: "pointer",
-                    }}
-                />
-            ))}
-        </Box>
-    );
-};
-
-export default TeamSlot;
+export default PokemonSelector;

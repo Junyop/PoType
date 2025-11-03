@@ -77,10 +77,10 @@ const TeamBuilder = () => {
                 </Button>
             </Box>
 
-            <Grid container spacing={2} justifyContent="center" alignItems="flex-start">
+            <Grid container spacing={3} justifyContent="center" alignItems="flex-start">
                 {team.map((slot, index) => (
                     <Grid item key={index}>
-                        <Paper elevation={3}>
+                        <Paper elevation={2}>
                             <TeamSlot slotIndex={index} slot={slot} />
                         </Paper>
                     </Grid>

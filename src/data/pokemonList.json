@@ -6887,13 +6887,13 @@
     },
     {
         "id": 727,
-        "name": "Infernape",
+        "name": "Incineroar",
         "types": [
             "fire",
             "fighting"
         ],
         "gen": 7,
-        "sprite": "https://img.pokemondb.net/sprites/home/normal/infernape.png"
+        "sprite": "https://img.pokemondb.net/sprites/home/normal/incineroar.png"
     },
     {
         "id": 728,
