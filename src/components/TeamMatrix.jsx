@@ -100,7 +100,7 @@ const TeamMatrix = ({ team = [], flgTeam }) => {
             })
             .filter(Boolean);
 
-    }, [summary, mode]);
+    }, [summary, mode, allTypes]);
 
     return (
         <Box sx={{ mt: 4 }}>

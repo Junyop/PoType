@@ -85,12 +85,14 @@ const TeamBuilder = () => {
                 ))}
             </Grid>
             {
-                (!team.some(slot => slot.pokemon)) &&
+                (!team.some(slot => slot.pokemon) && !team.some(slot => slot.types.length > 0)
+                ) &&
                 <Typography variant="h6" align="center" sx={{ mt: 4, color: 'text.secondary' }}>
                     Lütfen analiz için takımınıza Pokémon veya tip ekleyiniz.
                 </Typography>
             }
-            {(team.some(slot => slot.pokemon)) &&
+            {(team.some(slot => slot.pokemon) || team.some(slot => slot.types.length > 0)
+            ) &&
                 <Box sx={{ mt: 4 }}>
                     <TeamMatrix team={team} flgTeam={true} />
                 </Box>
