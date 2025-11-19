@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import TypeSelectorModeContext from '../contexts/TypeSelectorModeContext';
 
-
+// Bu sağlayıcı, TypeSelectorModeContext için durumu yönetir
 const TypeSelectorModeProvider = ({ children }) => {
     const [mode, setMode] = useState('pokemon');
 

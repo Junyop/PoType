@@ -5,14 +5,14 @@ import { typeColors } from '../utils/typeColors';
 const TypeBadge = ({ type }) => {
     return (
         <Chip
-            label={type.toUpperCase()}
+            label={type.toUpperCase?.() || type}
+            size="small"
             sx={{
-                backgroundColor: typeColors[type] || '#ccc',
+                backgroundColor: typeColors[type] || '#9e9e9e',
                 color: '#fff',
                 fontWeight: 'bold',
                 textTransform: 'uppercase'
             }}
-            size="small"
         />
     );
 };

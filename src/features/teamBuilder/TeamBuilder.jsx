@@ -1,7 +1,6 @@
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import TeamSlot from '../../components/TeamSlot';
-import SummaryTable from '../../components/SummaryTable';
 import { resetTeam, setFullTeam } from './teamBuilderSlice';
 
 import {
@@ -10,14 +9,13 @@ import {
     Button,
     Typography,
     Paper,
-    ButtonGroup,
     Box,
 } from '@mui/material';
+import TeamMatrix from '../../components/TeamMatrix';
 
 const TeamBuilder = () => {
     const dispatch = useDispatch();
     const team = useSelector((state) => state.teamBuilder.team);
-
     const handleExport = () => {
         const blob = new Blob([JSON.stringify(team, null, 2)], {
             type: 'application/json',
@@ -86,10 +84,19 @@ const TeamBuilder = () => {
                     </Grid>
                 ))}
             </Grid>
+            {
+                (!team.some(slot => slot.pokemon)) &&
+                <Typography variant="h6" align="center" sx={{ mt: 4, color: 'text.secondary' }}>
+                    Lütfen analiz için takımınıza Pokémon veya tip ekleyiniz.
+                </Typography>
+            }
+            {(team.some(slot => slot.pokemon)) &&
+                <Box sx={{ mt: 4 }}>
+                    <TeamMatrix team={team} flgTeam={true} />
+                </Box>
+            }
+            { }
 
-            <Box sx={{ mt: 4 }}>
-                <SummaryTable team={team} />
-            </Box>
         </Container>
     );
 };

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from "react";
-import { useDispatch } from "react-redux";
-import { setSlotTypes } from "../features/teamBuilder/teamBuilderSlice";
+import { useDispatch, useSelector } from "react-redux";
+import { setSlotTypes, setFilterParameters } from "../features/teamBuilder/teamBuilderSlice";
 import typeChart from "../data/typeChart.json";
 import fullPokemonList from "../data/pokemonList.json";
 import {
@@ -16,13 +16,10 @@ import {
     Tooltip,
     Stack,
     Button,
-    Collapse,
     Menu,
-    Divider,
 } from "@mui/material";
 import SortIcon from "@mui/icons-material/Sort";
 import useTypeSelectorMode from "../contexts/useTypeSelectorMode";
-import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import typeColors from "../utils/typeColors";
 
 const allTypes = Object.keys(typeChart);
@@ -52,7 +49,7 @@ const TeamSlot = ({ slotIndex, slot }) => {
         const found = pokemonList.find((p) => p.name === name);
         if (found) {
             setSelectedTypes(found.types);
-            dispatch(setSlotTypes({ slotIndex, types: found.types, pokemon: name }));
+            dispatch(setSlotTypes({ slotIndex, types: found.types, pokemon: name, sprite: found.sprite }));
         }
     };
 
@@ -61,11 +58,12 @@ const TeamSlot = ({ slotIndex, slot }) => {
         setSelectedPokemon("");
         dispatch(setSlotTypes({ slotIndex, types, pokemon: "" }));
     };
+    const filterParams = useSelector((state) => state.teamBuilder.filterParameters[slotIndex]) || { searchTerm: "", typeFilter: [], genFilter: "all", sortMode: "id-asc" };
 
     const selectedPokeData = pokemonList.find((p) => p.name === selectedPokemon);
 
     const cardWidth = 300;
-    const cardHeight = 390;
+    const cardHeight = 430;
 
     return (
         <Box
@@ -83,13 +81,13 @@ const TeamSlot = ({ slotIndex, slot }) => {
                 alignItems: "center",
                 transition: "all 0.25s ease",
                 "&:hover": { transform: "translateY(-3px)", boxShadow: 4 },
-                backgroundColor: isPokemonMode
+                background: isPokemonMode
                     ? selectedPokeData
-                        ? typeColors(selectedPokeData.types[0]) + "72"
-                        : "grey.200"
+                        ? `linear-gradient(135deg, ${typeColors(selectedPokeData.types[0])}99,  ${typeColors(selectedPokeData.types[1] || selectedPokeData.types[0])}88)`
+                        : "#e0e0e0"
                     : isTypeMode
-                        ? typeColors(selectedTypes[0] || "normal") + "72"
-                        : "grey.200"
+                        ? `linear-gradient(135deg, ${typeColors(selectedTypes[0] || "normal")}99, ${typeColors(selectedTypes[1] || selectedTypes[0] || "normal")}88)`
+                        : "#e0e0e0"
             }}
         >
             <Typography variant="subtitle1" sx={{ fontWeight: "bold", mb: 1 }}>
@@ -136,7 +134,8 @@ const TeamSlot = ({ slotIndex, slot }) => {
                     },
                 }}
             >{isPokemonMode ? (
-                <PokemonSelector value={selectedPokemon} onChange={handlePokemonChange} />
+                <PokemonSelector value={selectedPokemon} onChange={handlePokemonChange} filterParams={filterParams} slotIndex={slotIndex}
+                />
             ) : (
                 <TypeSelector value={selectedTypes} onChange={handleTypeChange} />
             )}
@@ -148,31 +147,37 @@ const TeamSlot = ({ slotIndex, slot }) => {
 /* --------------------------
    PokemonSelector Component
 ---------------------------*/
-const PokemonSelector = ({ value, onChange }) => {
-    const [searchTerm, setSearchTerm] = useState("");
-    const [typeFilter, setTypeFilter] = useState([]);
-    const [genFilter, setGenFilter] = useState("all");
-    const [sortMode, setSortMode] = useState("id-asc");
+const PokemonSelector = ({ slotIndex, value, onChange, filterParams }) => {
+    const dispatch = useDispatch();
+
+    // fallback filter
+    const { searchTerm = "", typeFilter = [], genFilter = "all", sortMode = "id-asc" } =
+        filterParams || {};
     const [anchorEl, setAnchorEl] = useState(null);
 
     const handleOpenSortMenu = (e) => setAnchorEl(e.currentTarget);
     const handleCloseSortMenu = () => setAnchorEl(null);
     const handleSortChange = (mode) => {
-        setSortMode(mode);
+        dispatch(setFilterParameters({ slotIndex, ...filterParams, sortMode: mode }));
         handleCloseSortMenu();
+    };
+
+    // Local değişiklikleri Redux'a yaz
+    const updateFilter = (changes) => {
+        dispatch(setFilterParameters({ slotIndex, ...filterParams, ...changes }));
     };
 
     // 🔹 Filtreleme işlemleri
     const filteredList = useMemo(() => {
         let list = pokemonList;
 
-        // Arama (en az 2-3 harf)
+        // Arama
         if (searchTerm.trim().length >= 2) {
             const term = searchTerm.toLowerCase();
             list = list.filter((p) => p.name.toLowerCase().includes(term));
         }
 
-        // Türe göre filtreleme
+        // Type filtresi
         if (typeFilter.length > 0) {
             list = list.filter((p) => typeFilter.every((t) => p.types.includes(t)));
         }
@@ -195,32 +200,25 @@ const PokemonSelector = ({ value, onChange }) => {
         return list;
     }, [searchTerm, typeFilter, genFilter, sortMode]);
 
-    const sortLabelMap = {
-        "id-asc": "ID ↑",
-        "id-desc": "ID ↓",
-        "name-asc": "A → Z",
-        "name-desc": "Z → A",
-    };
-
-    //  Mevcut jenerasyonlar (otomatik liste)
     const generations = [...new Set(pokemonList.map((p) => p.gen))].sort((a, b) => a - b);
 
+    const resetSlot = () => {
+        // filtreleri sıfırla
+        dispatch(setFilterParameters({ slotIndex, searchTerm: "", typeFilter: [], genFilter: "all", sortMode: "id-asc" }));
+        // bu slottaki seçimi sıfırla (pokemon, types, sprite)
+        dispatch(setSlotTypes({ slotIndex, types: [], pokemon: "", sprite: "" }));
+    };
+
     return (
-        <Box sx={{
-            width: "100%",
-            display: "flex",
-            flexDirection: "column",
-            gap: 1.5,
-            alignItems: "stretch",
-        }}>
-            {/*  Arama + sıralama barı */}
+        <Box sx={{ width: "100%", display: "flex", flexDirection: "column", gap: 1.5 }}>
+            {/* Arama + sıralama barı */}
             <Stack direction="row" spacing={1} alignItems="center">
                 <TextField
                     size="small"
                     variant="outlined"
                     label="Ara (min 2 harf)"
                     value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
+                    onChange={(e) => updateFilter({ searchTerm: e.target.value })}
                     fullWidth
                 />
                 <Tooltip title="Sıralama Modu">
@@ -236,19 +234,17 @@ const PokemonSelector = ({ value, onChange }) => {
                 </Menu>
             </Stack>
 
-            {/*  Jenerasyon seçimi */}
+            {/* Jenerasyon seçimi */}
             <FormControl size="small" fullWidth>
                 <InputLabel>Jenerasyon</InputLabel>
                 <Select
                     label="Jenerasyon"
                     value={genFilter}
-                    onChange={(e) => setGenFilter(e.target.value)}
+                    onChange={(e) => updateFilter({ genFilter: e.target.value })}
                 >
                     <MenuItem value="all">Tümü</MenuItem>
                     {generations.map((g) => (
-                        <MenuItem key={g} value={g}>
-                            Gen {g}
-                        </MenuItem>
+                        <MenuItem key={g} value={g}>Gen {g}</MenuItem>
                     ))}
                 </Select>
             </FormControl>
@@ -259,17 +255,8 @@ const PokemonSelector = ({ value, onChange }) => {
                 <Select value={value} label="Pokémon Seç" onChange={onChange}>
                     {filteredList.map((poke) => (
                         <MenuItem key={poke.id} value={poke.name}>
-                            <Box sx={{
-                                display: "flex",
-                                alignItems: "center",
-                                gap: 1,
-                            }}>
-                                <img
-                                    src={poke.sprite}
-                                    alt={poke.name}
-                                    width={32}
-                                    height={32}
-                                />
+                            <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                                <img src={poke.sprite} alt={poke.name} width={32} height={32} />
                                 <Typography>{poke.name}</Typography>
                             </Box>
                         </MenuItem>
@@ -277,7 +264,7 @@ const PokemonSelector = ({ value, onChange }) => {
                 </Select>
             </FormControl>
 
-            {/* Tip filtreleri*/}
+            {/* Type filtreleri */}
             <Box
                 sx={{
                     display: "grid",
@@ -292,15 +279,14 @@ const PokemonSelector = ({ value, onChange }) => {
                         key={type}
                         label={type}
                         size="small"
-                        onClick={() =>
-                            setTypeFilter((prev) =>
-                                prev.includes(type)
-                                    ? prev.filter((t) => t !== type)
-                                    : prev.length < 2
-                                        ? [...prev, type]
-                                        : prev
-                            )
-                        }
+                        onClick={() => {
+                            const updated = typeFilter.includes(type)
+                                ? typeFilter.filter((t) => t !== type)
+                                : typeFilter.length < 2
+                                    ? [...typeFilter, type]
+                                    : typeFilter;
+                            updateFilter({ typeFilter: updated });
+                        }}
                         sx={{
                             bgcolor: typeFilter.includes(type)
                                 ? typeColors(type)
@@ -314,17 +300,26 @@ const PokemonSelector = ({ value, onChange }) => {
                     />
                 ))}
             </Box>
-            <Typography
-                variant="caption"
-                color="text.secondary"
-                align="center"
-                sx={{ mt: 0.5 }}
+
+            {/* Filtre reset butonu */}
+            <Button
+                variant="outlined"
+                size="small"
+                color="error"
+                sx={{ mt: 1 }}
+                onClick={() => resetSlot()}
             >
-                Sıralama: {sortLabelMap[sortMode]}
+                Filtreleri Sıfırla
+            </Button>
+
+            <Typography variant="caption" color="text.secondary" align="center" sx={{ mt: 0.5 }}>
+                Sıralama: {sortMode == "id-asc" ? "ID ↑" : (sortMode == "id-desc" ? "ID ↓" : (sortMode == "name-asc" ? "A → Z" : "Z → A"))}
+
             </Typography>
         </Box>
     );
 };
+
 
 
 /* --------------------------
