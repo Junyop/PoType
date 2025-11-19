@@ -51,7 +51,7 @@ const TeamBuilder = () => {
                 gutterBottom
                 sx={{ color: 'primary.main' }}
             >
-                Pokémon Takım Analizörü
+                Pokémon Takım Oluşturucu
             </Typography>
 
             <Box sx={{

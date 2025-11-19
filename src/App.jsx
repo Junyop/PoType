@@ -4,6 +4,7 @@ import TypeCalculator from './features/typeCalculator/TypeCalculator';
 import TeamBuilder from './features/teamBuilder/TeamBuilder';
 import Navbar from './components/Navbar';
 import ModeToggle from './components/ModeToggle';
+import Footer from './components/Footer';
 
 function App() {
   return (
@@ -16,7 +17,7 @@ function App() {
         <Route path="/calculator" element={<TypeCalculator />} />
         <Route path="/team" element={<TeamBuilder />} />
       </Routes>
-
+      <Footer />
     </Router>
   );
 }

@@ -158,7 +158,7 @@ const TypeCalculator = (selected) => {
                 gutterBottom
                 sx={{ color: "primary.main" }}
             >
-                Pokémon Tip Analizörü
+                Pokémon Tip Hesaplayıcı
             </Typography>
 
             <Paper
